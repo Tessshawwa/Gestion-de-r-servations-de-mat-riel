@@ -4,15 +4,16 @@
 Cette application permet la gestion et la visualisation des réservations de matériel au sein d'un établissement. L'application est divisée en deux parties principales : une interface de gestion des données (CRUD) et un tableau de bord statistique.
 
 ## Architecture des Données (Modèle)
-Le code repose sur 3 classes principales :
+Le code repose sur 4 classes principales :
 * **Utilisateur** : `id`, `nom`, `prénom`, `fonction` (étudiant, professionnel ou enseignant).
 * **Ressource** : `id`, `domaine`, `description`.
 * **Reservation** : `id`, `date-heure de début`, `type`, `dernière mise à jour`.
+* **FichierCSV** : Classe utilitaire ( sans attributs) dédiée à la lecture et l'écriture de la base de données. Elle intègre un algorithme de détection et de blocage des doublons lors de l'importation.
 
 ## Fonctionnalités Principales
 
 ### 1. Interface de Gestion (Vue Gestion)
-* **Importation** : Chargement d'un fichier `.csv` contenant la base de données initiale.
+* **Importation** : Chargement d'un fichier.csv via la classe FichierCSV qui nettoie automatiquement les doublons avant l'affichage.
 * **Visualisation** : Affichage des données sous forme de tableau interactif (lignes et colonnes).
 * **Ajout d'une réservation** : Formulaire permettant de renseigner les informations via :
   * Des champs de texte (ex: `id` : "mono1", description).
