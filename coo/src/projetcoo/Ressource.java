@@ -5,6 +5,8 @@ public class Ressource {
 	    private String domaine;     
 	    private String description; 
 
+	    
+	    /* Constructeur de la Ressource*/
 	    public Ressource(String id, String domaine, String description) {
 	        this.id = id;
 	        this.domaine = domaine;

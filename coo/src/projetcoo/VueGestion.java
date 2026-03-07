@@ -9,243 +9,314 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Classe VueGestion
+ * -----------------
+ * Cette classe représente l'interface principale permettant
+ * de gérer les réservations d'outils.
+ *
+ * Elle permet à l'utilisateur de :
+ * - charger un fichier CSV contenant des réservations
+ * - ajouter une nouvelle réservation
+ * - modifier une réservation existante
+ * - supprimer une réservation
+ * - exporter les réservations vers un fichier CSV
+ *
+ * Les données sont affichées dans un tableau (JTable) et
+ * peuvent être modifiées à partir d'un formulaire situé
+ * à droite de l'interface.
+ *
+ * Cette classe communique également avec VueStatistiques
+ * afin de mettre à jour les graphiques après chaque modification.
+ */
 public class VueGestion extends JPanel {
 
+    // Tableau graphique qui affiche les réservations
     private JTable table;
+
+    // Modèle de données utilisé par le tableau
     private DefaultTableModel tableModel;
     
+    // Liste contenant toutes les réservations en mémoire
     private List<Reservation> reservationsList;
+
+    // Référence vers la vue des statistiques
     private VueStatistiques vueStats; 
     
+    // Champs du formulaire
     private JTextField txtIdUser, txtNom, txtPrenom, txtDescription, txtResId;
+
+    // Listes déroulantes pour certains choix
     private JComboBox<String> cbFonction, cbDomaine, cbType, cbHeure, cbMinute;
+
+    // Sélecteur de date
     private JSpinner dateSpinner; 
     
+    // Format d'affichage des dates
     private DateTimeFormatter dtfDisplay = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    // Format utilisé pour la dernière mise à jour
     private DateTimeFormatter dtfUpdate = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm:ss");
 
+    /**
+     * Constructeur de la vue de gestion
+     * Initialise toute l'interface graphique
+     */
     public VueGestion(List<Reservation> reservationsList, VueStatistiques vueStats) {
+
         this.reservationsList = reservationsList;
         this.vueStats = vueStats;
         
+        // Organisation principale de l'interface
         setLayout(new BorderLayout());
 
+        // -------------------------------------------------
+        // PANEL DU HAUT : boutons de chargement et export
+        // -------------------------------------------------
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
         JButton btnLoad = new JButton("Charger CSV");
         JButton btnExport = new JButton("Exporter CSV (Desktop)");
-        topPanel.add(btnLoad); topPanel.add(btnExport);
+
+        topPanel.add(btnLoad);
+        topPanel.add(btnExport);
+
         add(topPanel, BorderLayout.NORTH);
 
-        String[] columnNames = {"ID Résa", "ID Utilisateur", "Nom", "Prénom", "Fonction", "Domaine", "Ressource", "Description", "Date Début", "Durée écoulée", "Type", "Dernière MàJ"};
+        // -------------------------------------------------
+        // TABLEAU CENTRAL : affichage des réservations
+        // -------------------------------------------------
+
+        String[] columnNames = {
+                "ID Résa", "ID Utilisateur", "Nom", "Prénom", "Fonction",
+                "Domaine", "Ressource", "Description",
+                "Date Début", "Durée écoulée", "Type", "Dernière MàJ"
+        };
+
         tableModel = new DefaultTableModel(columnNames, 0);
         table = new JTable(tableModel);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // -------------------------------------------------
+        // PANEL DROIT : formulaire de création/modification
+        // -------------------------------------------------
 
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
         formPanel.setBorder(BorderFactory.createTitledBorder("Détails Réservation"));
         formPanel.setPreferredSize(new Dimension(260, 0));
 
+        // Champ ID utilisateur
         formPanel.add(createLabel("ID Utilisateur :"));
-        txtIdUser = new JTextField(); fixerTailleMax(txtIdUser); formPanel.add(txtIdUser);
+        txtIdUser = new JTextField();
+        fixerTailleMax(txtIdUser);
+        formPanel.add(txtIdUser);
 
+        // Nom
         formPanel.add(createLabel("Nom (optionnel) :"));
-        txtNom = new JTextField(); fixerTailleMax(txtNom); formPanel.add(txtNom);
+        txtNom = new JTextField();
+        fixerTailleMax(txtNom);
+        formPanel.add(txtNom);
         
+        // Prénom
         formPanel.add(createLabel("Prénom (optionnel) :"));
-        txtPrenom = new JTextField(); fixerTailleMax(txtPrenom); formPanel.add(txtPrenom);
+        txtPrenom = new JTextField();
+        fixerTailleMax(txtPrenom);
+        formPanel.add(txtPrenom);
         
+        // Fonction de l'utilisateur
         formPanel.add(createLabel("Fonction :"));
-        cbFonction = new JComboBox<>(new String[]{"Etudiant", "Professionnel", "Enseignant"});
-        fixerTailleMax(cbFonction); formPanel.add(cbFonction);
+        cbFonction = new JComboBox<>(new String[]{
+                "Etudiant", "Professionnel", "Enseignant"
+        });
+
+        fixerTailleMax(cbFonction);
+        formPanel.add(cbFonction);
+
         formPanel.add(new JSeparator());
 
+        // Domaine de la ressource
         formPanel.add(createLabel("Domaine :"));
-        cbDomaine = new JComboBox<>(new String[]{"Appareil Photo", "Camescope", "Enceinte", "Enregistreur Numerique", "NOUVEAUX PC COURTE DUREE", "NOUVEAUX PC LONGUE DUREE", "PC Courte Duree", "PC Longue Duree", "Retroprojecteur", "Tablettes Ipad - Longue Durée", "Trepied Photo / Vidéo", "Videoprojecteur"});
-        fixerTailleMax(cbDomaine); formPanel.add(cbDomaine);
+        cbDomaine = new JComboBox<>(new String[]{
+                "Appareil Photo", "Camescope", "Enceinte", "Enregistreur Numerique",
+                "NOUVEAUX PC COURTE DUREE", "NOUVEAUX PC LONGUE DUREE",
+                "PC Courte Duree", "PC Longue Duree", "Retroprojecteur",
+                "Tablettes Ipad - Longue Durée", "Trepied Photo / Vidéo", "Videoprojecteur"
+        });
+
+        fixerTailleMax(cbDomaine);
+        formPanel.add(cbDomaine);
         
+        // Identifiant de la ressource
         formPanel.add(createLabel("Nom/ID Ressource :"));
-        txtResId = new JTextField(); fixerTailleMax(txtResId); formPanel.add(txtResId);
+        txtResId = new JTextField();
+        fixerTailleMax(txtResId);
+        formPanel.add(txtResId);
         
+        // Description
         formPanel.add(createLabel("Description :"));
-        txtDescription = new JTextField(); fixerTailleMax(txtDescription); formPanel.add(txtDescription);
+        txtDescription = new JTextField();
+        fixerTailleMax(txtDescription);
+        formPanel.add(txtDescription);
+
         formPanel.add(new JSeparator());
 
+        // -------------------------------------------------
+        // Sélection de la date
+        // -------------------------------------------------
         formPanel.add(createLabel("Date (Calendrier) :"));
+
         dateSpinner = new JSpinner(new SpinnerDateModel());
         dateSpinner.setEditor(new JSpinner.DateEditor(dateSpinner, "dd/MM/yyyy"));
-        fixerTailleMax(dateSpinner); formPanel.add(dateSpinner);
 
+        fixerTailleMax(dateSpinner);
+        formPanel.add(dateSpinner);
+
+        // -------------------------------------------------
+        // Sélection de l'heure
+        // -------------------------------------------------
         formPanel.add(createLabel("Heure de début :"));
+
         JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         fixerTailleMax(timePanel);
-        String[] heures = new String[24]; for(int i=0; i<24; i++) heures[i] = String.format("%02d", i);
+
+        String[] heures = new String[24];
+        for(int i=0; i<24; i++)
+            heures[i] = String.format("%02d", i);
+
         cbHeure = new JComboBox<>(heures);
+
         cbMinute = new JComboBox<>(new String[]{"00", "15", "30", "45"});
-        timePanel.add(cbHeure); timePanel.add(new JLabel(" h ")); timePanel.add(cbMinute);
+
+        timePanel.add(cbHeure);
+        timePanel.add(new JLabel(" h "));
+        timePanel.add(cbMinute);
+
         formPanel.add(timePanel);
 
+        // -------------------------------------------------
+        // Type de réservation
+        // -------------------------------------------------
         formPanel.add(createLabel("Type d'emprunt :"));
-        cbType = new JComboBox<>(new String[]{"Emprunt", "Cours", "Maintenance"});
-        fixerTailleMax(cbType); formPanel.add(cbType);
+
+        cbType = new JComboBox<>(new String[]{
+                "Emprunt", "Cours", "Maintenance"
+        });
+
+        fixerTailleMax(cbType);
+        formPanel.add(cbType);
+
         formPanel.add(Box.createVerticalStrut(20));
 
+        // -------------------------------------------------
+        // Boutons d'action
+        // -------------------------------------------------
+
         JPanel btnPanel = new JPanel(new GridLayout(1, 3, 5, 5));
+
         fixerTailleMax(btnPanel);
-        JButton btnAdd = new JButton("Ajouter"); btnAdd.setBackground(new Color(200, 255, 200));
+
+        JButton btnAdd = new JButton("Ajouter");
+        btnAdd.setBackground(new Color(200, 255, 200));
+
         JButton btnUpdate = new JButton("Modifier");
-        JButton btnDelete = new JButton("Supprimer"); btnDelete.setBackground(new Color(255, 200, 200));
-        btnPanel.add(btnAdd); btnPanel.add(btnUpdate); btnPanel.add(btnDelete);
+
+        JButton btnDelete = new JButton("Supprimer");
+        btnDelete.setBackground(new Color(255, 200, 200));
+
+        btnPanel.add(btnAdd);
+        btnPanel.add(btnUpdate);
+        btnPanel.add(btnDelete);
+
         formPanel.add(btnPanel);
+
         add(formPanel, BorderLayout.EAST);
 
-        btnLoad.addActionListener(e -> { chargerCSV(); vueStats.rafraichir(reservationsList); });
-        btnAdd.addActionListener(e -> { ajouterReservation(); vueStats.rafraichir(reservationsList); });
-        btnUpdate.addActionListener(e -> { modifierReservation(); vueStats.rafraichir(reservationsList); });
-        btnDelete.addActionListener(e -> { supprimerReservation(); vueStats.rafraichir(reservationsList); });
+        // -------------------------------------------------
+        // ACTIONS DES BOUTONS
+        // -------------------------------------------------
+
+        btnLoad.addActionListener(e -> {
+            chargerCSV();
+            vueStats.rafraichir(reservationsList);
+        });
+
+        btnAdd.addActionListener(e -> {
+            ajouterReservation();
+            vueStats.rafraichir(reservationsList);
+        });
+
+        btnUpdate.addActionListener(e -> {
+            modifierReservation();
+            vueStats.rafraichir(reservationsList);
+        });
+
+        btnDelete.addActionListener(e -> {
+            supprimerReservation();
+            vueStats.rafraichir(reservationsList);
+        });
+
         btnExport.addActionListener(e -> exporterCSV());
 
+        // Lorsque l'utilisateur clique sur une ligne du tableau,
+        // les informations sont chargées dans le formulaire
         table.getSelectionModel().addListSelectionListener(event -> {
+
             if (!event.getValueIsAdjusting() && table.getSelectedRow() != -1) {
+
                 remplirFormulaireDepuisSelection(table.getSelectedRow());
             }
         });
     }
 
+    /**
+     * Fixe la taille maximale d’un composant afin d’éviter
+     * qu’il s’étire trop dans le layout vertical.
+     */
     private void fixerTailleMax(JComponent comp) {
+
         comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28)); 
     }
 
+    /**
+     * Charge un fichier CSV contenant des réservations
+     * et les affiche dans le tableau.
+     */
     private void chargerCSV() {
+
         JFileChooser fileChooser = new JFileChooser();
+
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
             try {
-                // 1. Nettoyage de l'affichage actuel
-                reservationsList.clear(); 
+
+                reservationsList.clear();
                 tableModel.setRowCount(0);
-                
-                // 2. APPEL MAGIQUE À LA CLASSE FichiersCSV
-                List<Reservation> nouvellesResas = FichierCSV.charger(fileChooser.getSelectedFile());
-                
-                // 3. Mise à jour de l'interface graphique
+
+                // Appel à la classe utilitaire de gestion CSV
+                List<Reservation> nouvellesResas =
+                        FichierCSV.charger(fileChooser.getSelectedFile());
+
                 for(Reservation res : nouvellesResas) {
+
                     reservationsList.add(res);
                     ajouterLigneTable(res);
                 }
-                
-                JOptionPane.showMessageDialog(this, "Chargement terminé ! (" + nouvellesResas.size() + " lignes importées sans doublons)");
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Chargement terminé ! (" + nouvellesResas.size() + " lignes importées sans doublons)"
+                );
+
             } catch (Exception ex) {
+
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Erreur CSV : " + ex.getMessage());
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Erreur CSV : " + ex.getMessage()
+                );
             }
         }
     }
-
-    private void ajouterReservation() {
-        Utilisateur u = new Utilisateur(txtIdUser.getText(), txtNom.getText(), txtPrenom.getText(), (String) cbFonction.getSelectedItem());
-        Ressource r = new Ressource(txtResId.getText(), (String) cbDomaine.getSelectedItem(), txtDescription.getText());
-        
-        Calendar cal = Calendar.getInstance(); cal.setTime((Date) dateSpinner.getValue());
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt((String)cbHeure.getSelectedItem()));
-        cal.set(Calendar.MINUTE, Integer.parseInt((String)cbMinute.getSelectedItem()));
-        LocalDateTime ldt = LocalDateTime.ofInstant(cal.toInstant(), java.time.ZoneId.systemDefault());
-
-        Reservation newRes = new Reservation(UUID.randomUUID().toString(), u, r, ldt, (String) cbType.getSelectedItem());
-        reservationsList.add(newRes);
-        ajouterLigneTable(newRes);
-        viderFormulaire();
-    }
-
-    private void modifierReservation() {
-        int row = table.getSelectedRow(); if (row == -1) return;
-        Reservation res = reservationsList.get(row);
-        
-        res.getUtilisateur().setId(txtIdUser.getText());
-        res.getUtilisateur().setNom(txtNom.getText());
-        res.getUtilisateur().setPrenom(txtPrenom.getText());
-        res.getUtilisateur().setFonction((String)cbFonction.getSelectedItem());
-        
-        res.getRessource().setId(txtResId.getText());
-        res.getRessource().setDomaine((String)cbDomaine.getSelectedItem());
-        res.getRessource().setDescription(txtDescription.getText());
-
-        Calendar cal = Calendar.getInstance(); cal.setTime((Date) dateSpinner.getValue());
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt((String)cbHeure.getSelectedItem()));
-        cal.set(Calendar.MINUTE, Integer.parseInt((String)cbMinute.getSelectedItem()));
-        res.setDateHeureDebut(LocalDateTime.ofInstant(cal.toInstant(), java.time.ZoneId.systemDefault()));
-        res.setType((String)cbType.getSelectedItem());
-
-        tableModel.setValueAt(res.getUtilisateur().getId(), row, 1);
-        tableModel.setValueAt(res.getUtilisateur().getNom(), row, 2);
-        tableModel.setValueAt(res.getUtilisateur().getPrenom(), row, 3);
-        tableModel.setValueAt(res.getUtilisateur().getFonction(), row, 4);
-        tableModel.setValueAt(res.getRessource().getDomaine(), row, 5);
-        tableModel.setValueAt(res.getRessource().getId(), row, 6);
-        tableModel.setValueAt(res.getRessource().getDescription(), row, 7);
-        tableModel.setValueAt(res.getDateHeureDebut().format(dtfDisplay), row, 8);
-        
-        // --- APPEL DE LA MÉTHODE DEPUIS L'OBJET ---
-        tableModel.setValueAt(res.getDureeEcoulee(), row, 9); 
-        // ------------------------------------------
-        
-        tableModel.setValueAt(res.getType(), row, 10);
-        tableModel.setValueAt(res.getDerniereMiseAJour().format(dtfUpdate), row, 11);
-    }
-
-    private void supprimerReservation() {
-        int row = table.getSelectedRow();
-        if (row != -1) {
-            reservationsList.remove(row);
-            tableModel.removeRow(row);
-            viderFormulaire();
-        }
-    }
-
-    private void exporterCSV() {
-        File desktopFile = new File(System.getProperty("user.home") + "/Desktop/reservations_export.csv");
-        try {
-            // APPEL MAGIQUE À LA CLASSE FichiersCSV
-            FichierCSV.exporter(reservationsList, desktopFile);
-            JOptionPane.showMessageDialog(this, "Fichier exporté sur le bureau :\n" + desktopFile.getAbsolutePath());
-        } catch (Exception e) { 
-            e.printStackTrace(); 
-            JOptionPane.showMessageDialog(this, "Erreur lors de l'exportation : " + e.getMessage());
-        }
-    }
-    private void ajouterLigneTable(Reservation r) {
-        // --- APPEL DE LA MÉTHODE DEPUIS L'OBJET ---
-        tableModel.addRow(new Object[]{ 
-            r.getId(), r.getUtilisateur().getId(), r.getUtilisateur().getNom(), r.getUtilisateur().getPrenom(), r.getUtilisateur().getFonction(),
-            r.getRessource().getDomaine(), r.getRessource().getId(), r.getRessource().getDescription(),
-            r.getDateHeureDebut().format(dtfDisplay), r.getDureeEcoulee(), r.getType(), r.getDerniereMiseAJour().format(dtfUpdate)
-        });
-    }
-
-    private void remplirFormulaireDepuisSelection(int row) {
-        Reservation r = reservationsList.get(row);
-        txtIdUser.setText(r.getUtilisateur().getId());
-        txtNom.setText(r.getUtilisateur().getNom()); 
-        txtPrenom.setText(r.getUtilisateur().getPrenom()); 
-        cbFonction.setSelectedItem(r.getUtilisateur().getFonction());
-        
-        txtResId.setText(r.getRessource().getId()); 
-        cbDomaine.setSelectedItem(r.getRessource().getDomaine());
-        txtDescription.setText(r.getRessource().getDescription());
-        
-        dateSpinner.setValue(Date.from(r.getDateHeureDebut().atZone(java.time.ZoneId.systemDefault()).toInstant()));
-        cbHeure.setSelectedItem(String.format("%02d", r.getDateHeureDebut().getHour()));
-        int m = r.getDateHeureDebut().getMinute(); cbMinute.setSelectedItem(m >= 45 ? "45" : m >= 30 ? "30" : m >= 15 ? "15" : "00");
-        cbType.setSelectedItem(r.getType());
-    }
-
-    private void viderFormulaire() {
-        txtIdUser.setText(""); txtNom.setText(""); txtPrenom.setText(""); txtResId.setText(""); txtDescription.setText(""); table.clearSelection();
-    }
-
-    private JLabel createLabel(String text) { 
-        JLabel l = new JLabel(text); 
-        l.setAlignmentX(Component.LEFT_ALIGNMENT); 
-        l.setBorder(BorderFactory.createEmptyBorder(5, 0, 2, 0)); 
-        return l; 
-    }
-}
