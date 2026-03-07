@@ -1,25 +1,47 @@
-# Gestion-de-r-servations-de-mat-riel
-Projet COO
+Projet COO - Gestion des Réservations Universitaires
+📝 Description du projet
+Cette application permet la gestion et la visualisation des réservations de matériel au sein d'un établissement. L'application est divisée en deux parties principales : une interface de gestion des données (CRUD) et un tableau de bord statistique.
 
-Le code va avoir 3 classes prinicipales: 
-Utilisateurs avec les attribus: id, nom, prénom, fonction (étudiant ou professionnel) 
-Ressources avec les attribus: id, domaine, description
-Réservation avec les attribus: id, date-heure de debut, type, dernière mise à jour
+🏗️ Architecture des Données (Modèle)
+Le code repose sur 3 classes principales :
 
+Utilisateur : id, nom, prénom, fonction (étudiant, professionnel ou enseignant).
 
+Ressource : id, domaine, description.
 
+Reservation : id, date-heure de début, type, dernière mise à jour.
 
+⚙️ Fonctionnalités Principales
+1. Interface de Gestion (Vue Gestion)
+Importation : Chargement d'un fichier .csv contenant la base de données initiale.
 
-L'application doit afficher une fenetre qui a une option de charger un fichier csv (le fichier qui est donné par a  prof) en suite, l'application va contenir l'option de visualiser le ficher (une table des lignes et colonnes), l'application doit avoir l'option de ajouter des lignes (des reservations) donc ici la prof doit renseigner le nom (ex: mono1) le type d'emprunt (liste deroulante), le domaine (liste), la ressources (liste derolante aussi ) et la description (remplise manuellement). en suite, il faut qu'elle ajoute la date donc une petite fenetre doit afficher (visuel de calendrier) et l'heure aussi (liste deroulante). l'application doit enregistrer le temps exact de l'ajout d'une ligne pour avoir la date de Dernière mise à jour (jour/ mois/ année - heure-min-sec)
-l'application doit avoir une option de supprimer une ligne et modifier une ligne existante (c'est-à-dire, en accèdant à une ligne specific "une réervation unique avec un id" elle peut modifer touts les attribus des 3 listes (utilisateurs, ressources, réservations). 
+Visualisation : Affichage des données sous forme de tableau interactif (lignes et colonnes).
 
-à la fin, l'application va expoter le fichier csv et le télécharger dans le desktop. 
+Ajout d'une réservation : Formulaire permettant de renseigner les informations via :
 
+Des champs de texte (ex: id : "mono1", description).
 
-Dans un autre panel dans l'application, il y aure une option "Statistiques" ici la prof va pouvoir afficher et calculer: 
-• le top 5 des ressources les plus empruntées,
-• l’utilisateur le plus actif,
-• la proportion Emprunt / Cours / Maintenance par domaine,
-• un taux d’emprunt sur une période donnée,
+Des listes déroulantes (type d'emprunt, domaine, ressource, heure).
+
+Un calendrier visuel (JSpinner) pour la sélection de la date.
+
+Horodatage automatique : L'application enregistre le temps exact de l'ajout ou de la modification pour mettre à jour l'attribut Dernière mise à jour (format jj/MM/aaaa - HH:mm:ss).
+
+Modification et Suppression : En sélectionnant une ligne spécifique du tableau, l'utilisateur peut supprimer la réservation ou modifier l'ensemble de ses attributs.
+
+Exportation : Sauvegarde et téléchargement de la base de données mise à jour au format .csv directement sur le bureau de l'ordinateur.
+
+2. Interface de Statistiques (Vue Statistiques)
+Un second onglet génère automatiquement des graphiques interactifs (via JFreeChart) pour analyser l'utilisation du matériel :
+
+Le Top 5 des ressources les plus empruntées.
+
+L'utilisateur le plus actif.
+
+La proportion Emprunt / Cours / Maintenance.
+
+La répartition par fonction (Étudiant, Professionnel, etc.).
+
+L'évolution du taux d'emprunt dans le temps (courbe chronologique).
 • un taux d’emprunt pour un domaine spécifique,
 • une évolution du taux d’emprunt dans le temps
