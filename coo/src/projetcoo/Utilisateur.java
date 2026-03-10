@@ -27,7 +27,7 @@ public class Utilisateur {
 	    	return fonction; 
 	    	}
 	    
-	    // getter pour obtenir le nom complet
+	    // getter pour obtenir le nom et le prénom ensemble
 	    public String getNomComplet() { return nom + " " + prenom; }
 
 	    // Setters
